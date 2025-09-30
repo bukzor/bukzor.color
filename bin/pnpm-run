@@ -1,0 +1,10 @@
+#!/bin/sh
+# like `uv exec`, idempotently ensure dependencies are up-to-date before running
+# a command
+set -eu
+
+# prevent raciness/flakiness
+mkdir -p "$REPO/node_modules"
+flock "$REPO/node_modules" \
+  pnpm install
+pnpm exec "$@"

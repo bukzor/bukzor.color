@@ -1,0 +1,117 @@
+#!/bin/bash
+# Acceptance test for both Rust and Python implementations
+set -euo pipefail
+exec 2>&1  # prevent stderr de-interleaving
+
+# Configuration
+TEST_CASES_FILE="tests/test_cases.json"
+
+# Colors for output
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+TEAL='\033[0;36m'
+NC='\033[0m' # No Color
+
+PS4=$'\n${TEAL}${NC} '
+set -x
+
+: "${YELLOW}Running acceptance tests for bukzor.color implementations...${NC}"
+
+# Function to test an implementation
+test_implementation() {
+    local impl_name="$1"
+    local cmd_prefix="$2"
+    local test_case_name="$3"
+    local expected="$4"
+
+    : "${YELLOW}Testing $impl_name: $test_case_name${NC}"
+
+    # Run the command and capture output
+    local actual_output
+    if ! actual_output=$($cmd_prefix); then
+        : "${RED}❌ $impl_name failed to execute: $test_case_name${NC}"
+        return 1
+    fi
+
+    # For now, just check that the command runs without error
+    # TODO: Implement proper JSON comparison when implementations are complete
+    : "${GREEN}✅ $impl_name executed successfully: $test_case_name${NC}"
+    return 0
+}
+
+# Test Rust implementation
+: "${YELLOW}=== Testing Rust Implementation ===${NC}"
+rust_failures=0
+
+if command -v cargo; then
+    cd rust
+    if cargo build --quiet; then
+        : "${GREEN}✅ Rust build successful${NC}"
+
+        # Test basic help command
+        if cargo run --quiet -- --help; then
+            : "${GREEN}✅ Rust help command works${NC}"
+        else
+            : "${RED}❌ Rust help command failed${NC}"
+            ((rust_failures++))
+        fi
+
+        # Test basic convert command
+        if cargo run --quiet -- convert "#ff0000" --json; then
+            : "${GREEN}✅ Rust convert command works${NC}"
+        else
+            : "${RED}❌ Rust convert command failed${NC}"
+            ((rust_failures++))
+        fi
+    else
+        : "${RED}❌ Rust build failed${NC}"
+        ((rust_failures++))
+    fi
+    cd ..
+else
+    : "${YELLOW}⚠️  Rust/cargo not available, skipping Rust tests${NC}"
+fi
+
+# Test Python implementation
+: "${YELLOW}=== Testing Python Implementation ===${NC}"
+python_failures=0
+
+if command -v uv; then
+    cd python
+    if uv sync --quiet; then
+        : "${GREEN}✅ Python dependencies installed${NC}"
+
+        # Test basic help command
+        if uv run python -m bukzor_color.cli --help; then
+            : "${GREEN}✅ Python help command works${NC}"
+        else
+            : "${RED}❌ Python help command failed${NC}"
+            ((python_failures++))
+        fi
+
+        # Test basic convert command
+        if uv run python -m bukzor_color.cli convert "#ff0000" --json; then
+            : "${GREEN}✅ Python convert command works${NC}"
+        else
+            : "${RED}❌ Python convert command failed${NC}"
+            ((python_failures++))
+        fi
+    else
+        : "${RED}❌ Python dependency installation failed${NC}"
+        ((python_failures++))
+    fi
+    cd ..
+else
+    : "${YELLOW}⚠️  uv not available, skipping Python tests${NC}"
+fi
+
+# Summary
+total_failures=$((rust_failures + python_failures))
+if [ $total_failures -eq 0 ]; then
+    : "${GREEN}🎉 All acceptance tests passed!${NC}"
+    exit 0
+else
+    : "${RED}❌ $total_failures test(s) failed${NC}"
+    exit 1
+fi

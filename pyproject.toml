@@ -1,0 +1,28 @@
+[project]
+name = "bukzor-color-devenv"
+version = "0.1.0"
+description = "Development environment for bukzor.color multi-implementation project"
+requires-python = ">=3.13"
+dependencies = []
+
+[dependency-groups]
+dev = [
+  "pre-commit>=4.3.0",
+  "pyright>=1.1.405",
+  "black>=25.1.0",
+  "isort>=5.13.2",
+  "pyupgrade>=3.19.0",
+]
+
+[tool.pyright]
+typeCheckingMode = "strict"
+analyzeUnannotatedFunctions = true
+reportIncompatibleMethodOverride = "error"
+pythonVersion = "3.13"
+enableTypeIgnoreComments = true
+reportPrivateUsage = "warning"
+reportConstantRedefinition = "error"
+reportIncompatibleVariableOverride = "error"
+reportMissingImports = "error"
+reportMissingTypeStubs = false
+exclude = [".venv", "__pycache__", "node_modules", "trash", "rust/target"]

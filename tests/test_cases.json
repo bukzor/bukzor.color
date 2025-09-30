@@ -1,0 +1,27 @@
+[
+  {
+    "name": "red_hex_to_rgb",
+    "input": "#ff0000",
+    "command": ["convert", "#ff0000", "--to", "rgb", "--json"],
+    "expected_output": {
+      "input": "#ff0000",
+      "output_format": "rgb",
+      "result": "rgb(255, 0, 0)"
+    }
+  },
+  {
+    "name": "blue_hex_to_hsl",
+    "input": "#0000ff",
+    "command": ["convert", "#0000ff", "--to", "hsl", "--json"],
+    "expected_output": {
+      "input": "#0000ff",
+      "output_format": "hsl",
+      "result": "hsl(240, 100%, 50%)"
+    }
+  },
+  {
+    "name": "help_command",
+    "command": ["--help"],
+    "expected_contains": ["Color calculations and conversions CLI"]
+  }
+]
