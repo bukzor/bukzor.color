@@ -27,17 +27,20 @@ set -x                   # Enable trace mode
 echo "Status message"    # ✗ Avoid in scripts with set -x (double output)
 ```
 
-The `:` (colon) command is a no-op that evaluates its arguments, making it perfect for status messages in traced scripts.
+The `:` (colon) command is a no-op that evaluates its arguments, making it
+perfect for status messages in traced scripts.
 
 ## Directory Changes
 
 ### ✓ Good: Subshells preserve working directory
+
 ```bash
 (cd subdir && command)         # Returns to original dir
 (cd rust && cargo build)       # Directory change is isolated
 ```
 
 ### ✗ Bad: Global directory changes
+
 ```bash
 cd subdir && command           # Permanently changes directory
 cd rust                        # Affects all subsequent commands
@@ -45,6 +48,7 @@ cargo build
 ```
 
 ### Alternative: Avoid cd entirely
+
 ```bash
 cargo --manifest-path rust/Cargo.toml build
 command --working-dir subdir
@@ -78,6 +82,7 @@ fi
 ## Color Variables
 
 Define at script start:
+
 ```bash
 RED='\033[0;31m'
 GREEN='\033[0;32m'

@@ -12,6 +12,7 @@ dev = [
   "black>=25.1.0",
   "isort>=5.13.2",
   "pyupgrade>=3.19.0",
+  "bukzor-color[dev]",
 ]
 
 [tool.pyright]
@@ -25,4 +26,16 @@ reportConstantRedefinition = "error"
 reportIncompatibleVariableOverride = "error"
 reportMissingImports = "error"
 reportMissingTypeStubs = false
-exclude = [".venv", "__pycache__", "node_modules", "trash", "rust/target"]
+exclude = [
+  "**/.venv",
+  "**/__pycache__",
+  "**/node_modules",
+  "**/trash",
+  "**/rust/target",
+]
+
+[tool.uv.workspace]
+members = ["python"]
+
+[tool.uv.sources]
+bukzor-color = { workspace = true, editable = true }

@@ -1,6 +1,7 @@
 # Claude Agent Documentation
 
-This directory contains modular documentation to help Claude (and similar AI agents) work effectively with this codebase.
+This directory contains modular documentation to help Claude (and similar AI
+agents) work effectively with this codebase.
 
 ## Core Modules
 
@@ -18,6 +19,7 @@ This directory contains modular documentation to help Claude (and similar AI age
 ## Purpose
 
 These conventions were established through real development experience to:
+
 - Prevent common pitfalls
 - Ensure consistent code quality
 - Maintain clean git history
@@ -25,4 +27,5 @@ These conventions were established through real development experience to:
 
 ## Portability
 
-These modules are designed to be reusable across projects. Copy `.claude/` to new repositories and customize as needed.
+These modules are designed to be reusable across projects. Copy `.claude/` to
+new repositories and customize as needed.
