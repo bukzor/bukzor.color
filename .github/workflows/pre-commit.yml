@@ -48,10 +48,8 @@ jobs:
         with:
           components: rustfmt, clippy
 
-      - name: Install direnv
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y direnv
+      - name: direnv
+        uses: HatsuneMiku3939/direnv-action@v1.1.0
 
       - name: Set up Python environment
         run: uv sync
