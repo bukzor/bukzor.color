@@ -1,0 +1,1 @@
+"""Color encoding/decoding system analogous to str/bytes relationship."""
