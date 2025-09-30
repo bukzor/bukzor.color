@@ -78,9 +78,9 @@ def _parse_hsv_string(hsv_string: str) -> Color:
 
 def _hsv_to_color(h: Decimal, s: Decimal, v: Decimal) -> Color:
     """Convert HSV to Color via sRGB."""
-    h_norm = h / Decimal('360')
-    s_norm = s / Decimal('100')
-    v_norm = v / Decimal('100')
+    h_norm = h / Decimal("360")
+    s_norm = s / Decimal("100")
+    v_norm = v / Decimal("100")
 
     if s_norm == 0:
         # Achromatic
@@ -108,11 +108,7 @@ def _hsv_to_color(h: Decimal, s: Decimal, v: Decimal) -> Color:
     else:  # i == 5
         r, g, b = v_norm, p, q
 
-    return Color.from_srgb(
-        int(r * 255),
-        int(g * 255),
-        int(b * 255)
-    )
+    return Color.from_srgb(int(r * 255), int(g * 255), int(b * 255))
 
 
 # CSS Named Colors (subset for common colors)

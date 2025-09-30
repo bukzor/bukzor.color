@@ -20,7 +20,7 @@ def test_calculate_contrast():
     result = M.calculate_contrast(red, white)
 
     # Red/white should have ratio around 4.0
-    assert Decimal('3.9') < result.ratio < Decimal('4.1')
+    assert Decimal("3.9") < result.ratio < Decimal("4.1")
     assert result.foreground == red
     assert result.background == white
 
@@ -91,21 +91,21 @@ def test_contrast_result_compliance_summary():
 
 def test_get_target_ratio_from_wcag_level():
     """Test converting WCAG levels to numeric ratios."""
-    assert M.get_target_ratio("AA") == Decimal('4.5')
-    assert M.get_target_ratio("AAA") == Decimal('7')
-    assert M.get_target_ratio("AA-large") == Decimal('3')
-    assert M.get_target_ratio("AAA-large") == Decimal('4.5')
-    assert M.get_target_ratio("A") == Decimal('1')
+    assert M.get_target_ratio("AA") == Decimal("4.5")
+    assert M.get_target_ratio("AAA") == Decimal("7")
+    assert M.get_target_ratio("AA-large") == Decimal("3")
+    assert M.get_target_ratio("AAA-large") == Decimal("4.5")
+    assert M.get_target_ratio("A") == Decimal("1")
 
 
 def test_get_target_ratio_from_decimal():
     """Test passing existing decimal ratio."""
     from bukzor_color.types import ContrastRatio
 
-    ratio = ContrastRatio(Decimal('5.5'))
+    ratio = ContrastRatio(Decimal("5.5"))
     result = M.get_target_ratio(ratio)
 
-    assert result == Decimal('5.5')
+    assert result == Decimal("5.5")
 
 
 def test_adjust_contrast_already_compliant():
@@ -139,10 +139,13 @@ def test_adjust_contrast_foreground():
     # Background should be unchanged
     assert adjusted_bg == white
     # Foreground should be darker to increase contrast
-    assert WcagHCLEncoding.encode(adjusted_fg).l < WcagHCLEncoding.encode(light_gray).l
+    assert (
+        WcagHCLEncoding.encode(adjusted_fg).l
+        < WcagHCLEncoding.encode(light_gray).l
+    )
     # Should meet target (allowing for small precision errors)
     # TODO: stop allowing "small precision errors"
-    assert result.ratio >= Decimal('4.49')
+    assert result.ratio >= Decimal("4.49")
 
 
 def test_adjust_contrast_background():
@@ -163,6 +166,7 @@ def test_adjust_contrast_background():
     assert adjusted_bg != medium_gray
     # Should meet target (allowing for tiny precision errors)
     import math
+
     assert result.meets_level("AA") or math.isclose(float(result.ratio), 4.5)
 
 
@@ -192,14 +196,17 @@ def test_adjust_contrast_numeric_target():
     gray1 = Color.from_hex("#666666")
     gray2 = Color.from_hex("#cccccc")
 
-    target_ratio = ContrastRatio(Decimal('6.0'))
+    target_ratio = ContrastRatio(Decimal("6.0"))
     _adjusted_fg, _adjusted_bg, result = M.adjust_contrast(
         gray1, gray2, target_ratio
     )
 
     # Should meet or exceed the target ratio (allowing for tiny precision errors)
     import math
-    assert result.ratio >= Decimal('6.0') or math.isclose(float(result.ratio), 6.0)
+
+    assert result.ratio >= Decimal("6.0") or math.isclose(
+        float(result.ratio), 6.0
+    )
 
 
 def test_adjust_contrast_preserve_hue():
@@ -210,9 +217,7 @@ def test_adjust_contrast_preserve_hue():
     red = Color.from_hex("#ff0000")
     light_red = Color.from_hex("#ffcccc")
 
-    adjusted_fg, _adjusted_bg, result = M.adjust_contrast(
-        red, light_red, "AA"
-    )
+    adjusted_fg, _adjusted_bg, result = M.adjust_contrast(red, light_red, "AA")
 
     # Should meet target
     assert result.meets_level("AA")
@@ -220,12 +225,12 @@ def test_adjust_contrast_preserve_hue():
     # Hue should be preserved (approximately)
     original_h, _, _ = red.to_hsl()
     adjusted_h, _, _ = adjusted_fg.to_hsl()
-    assert abs(original_h - adjusted_h) < Decimal('10')  # Allow small variation
+    assert abs(original_h - adjusted_h) < Decimal(
+        "10"
+    )  # Allow small variation
 
 
 def test_invalid_wcag_level():
     """Test error handling for invalid WCAG levels."""
     with pytest.raises(ValueError, match="Unknown WCAG level"):
         M.get_target_ratio("INVALID")  # type: ignore[arg-type]
-
-

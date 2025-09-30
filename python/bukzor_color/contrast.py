@@ -7,7 +7,12 @@ from decimal import Decimal
 
 from bukzor_color.core import Color
 from bukzor_color.encodings.wcag_hcl import WcagHCLEncoding
-from bukzor_color.types import AdjustTarget, ContrastRatio, Degrees, Percentage, Luminance, WCAGLevel
+from bukzor_color.types import AdjustTarget
+from bukzor_color.types import ContrastRatio
+from bukzor_color.types import Degrees
+from bukzor_color.types import Luminance
+from bukzor_color.types import Percentage
+from bukzor_color.types import WCAGLevel
 
 
 @dataclass(frozen=True, slots=True)
@@ -21,22 +26,22 @@ class ContrastResult:
     @property
     def passes_AA(self) -> bool:
         """Check if contrast meets WCAG AA standard (4.5:1)."""
-        return self.ratio >= Decimal('4.5')
+        return self.ratio >= Decimal("4.5")
 
     @property
     def passes_AAA(self) -> bool:
         """Check if contrast meets WCAG AAA standard (7:1)."""
-        return self.ratio >= Decimal('7')
+        return self.ratio >= Decimal("7")
 
     @property
     def passes_AA_large(self) -> bool:
         """Check if contrast meets WCAG AA large text standard (3:1)."""
-        return self.ratio >= Decimal('3')
+        return self.ratio >= Decimal("3")
 
     @property
     def passes_AAA_large(self) -> bool:
         """Check if contrast meets WCAG AAA large text standard (4.5:1)."""
-        return self.ratio >= Decimal('4.5')
+        return self.ratio >= Decimal("4.5")
 
     def meets_level(self, level: WCAGLevel) -> bool:
         """Check if contrast meets specified WCAG level."""
@@ -74,9 +79,9 @@ def calculate_contrast(fg: Color, bg: Color) -> ContrastResult:
 
     # Ensure lighter color is in numerator
     if l1 > l2:
-        ratio = ContrastRatio((l1 + Decimal('0.05')) / (l2 + Decimal('0.05')))
+        ratio = ContrastRatio((l1 + Decimal("0.05")) / (l2 + Decimal("0.05")))
     else:
-        ratio = ContrastRatio((l2 + Decimal('0.05')) / (l1 + Decimal('0.05')))
+        ratio = ContrastRatio((l2 + Decimal("0.05")) / (l1 + Decimal("0.05")))
 
     return ContrastResult(foreground=fg, background=bg, ratio=ratio)
 
@@ -88,11 +93,11 @@ def get_target_ratio(level: WCAGLevel | ContrastRatio) -> ContrastRatio:
         return ContrastRatio(level)
 
     ratio_map = {
-        "A": Decimal('1'),      # No specific requirement
-        "AA": Decimal('4.5'),
-        "AAA": Decimal('7'),
-        "AA-large": Decimal('3'),
-        "AAA-large": Decimal('4.5'),
+        "A": Decimal("1"),  # No specific requirement
+        "AA": Decimal("4.5"),
+        "AAA": Decimal("7"),
+        "AA-large": Decimal("3"),
+        "AAA-large": Decimal("4.5"),
     }
 
     if level in ratio_map:
@@ -141,7 +146,7 @@ def adjust_contrast(
             fg_result = calculate_contrast(adjusted_fg, bg)
             fg_change = abs(fg.luminance() - adjusted_fg.luminance())
         except Exception:
-            fg_change = Decimal('inf')
+            fg_change = Decimal("inf")
             fg_result = current_result
             adjusted_fg = fg
 
@@ -150,7 +155,7 @@ def adjust_contrast(
             bg_result = calculate_contrast(fg, adjusted_bg)
             bg_change = abs(bg.luminance() - adjusted_bg.luminance())
         except Exception:
-            bg_change = Decimal('inf')
+            bg_change = Decimal("inf")
             bg_result = current_result
             adjusted_bg = bg
 
@@ -171,15 +176,13 @@ def adjust_contrast(
             else:
                 return fg, adjusted_bg, bg_result
     else:
-        raise ValueError(f"Invalid adjust target: {adjust}. Must be 'fg', 'bg', or 'auto'")
-
-
+        raise ValueError(
+            f"Invalid adjust target: {adjust}. Must be 'fg', 'bg', or 'auto'"
+        )
 
 
 def _adjust_lightness_for_contrast(
-    color_to_adjust: Color,
-    fixed_color: Color,
-    target_ratio: ContrastRatio,
+    color_to_adjust: Color, fixed_color: Color, target_ratio: ContrastRatio
 ) -> Color:
     """Adjust lightness of one color to achieve target contrast with another."""
     # Convert to WCAG HCL for direct luminance control
@@ -190,17 +193,23 @@ def _adjust_lightness_for_contrast(
 
     # Solve: target_ratio = (L_adjust + 0.05) / (L_fixed + 0.05)
     # So: L_adjust = target_ratio * (L_fixed + 0.05) - 0.05
-    required_luminance_1 = target_ratio * (fixed_wcag.l + Decimal('0.05')) - Decimal('0.05')
+    required_luminance_1 = target_ratio * (
+        fixed_wcag.l + Decimal("0.05")
+    ) - Decimal("0.05")
 
     # Also try the inverse case: target_ratio = (L_fixed + 0.05) / (L_adjust + 0.05)
     # So: L_adjust = (L_fixed + 0.05) / target_ratio - 0.05
-    required_luminance_2 = (fixed_wcag.l + Decimal('0.05')) / target_ratio - Decimal('0.05')
+    required_luminance_2 = (
+        fixed_wcag.l + Decimal("0.05")
+    ) / target_ratio - Decimal("0.05")
 
     # Try both luminance options and pick the valid one closest to current
     candidates: list[tuple[Color, ContrastRatio, Decimal]] = []
     for req_lum in [required_luminance_1, required_luminance_2]:
         # Create test color with new luminance
-        test_color = WcagHCLEncoding(Degrees(h), Percentage(c), Luminance(req_lum)).decode()
+        test_color = WcagHCLEncoding(
+            Degrees(h), Percentage(c), Luminance(req_lum)
+        ).decode()
         test_ratio = calculate_contrast(test_color, fixed_color).ratio
         candidates.append((test_color, test_ratio, req_lum))
 
@@ -220,5 +229,3 @@ def _adjust_lightness_for_contrast(
             return candidates[0][0]
         else:
             return color_to_adjust
-
-

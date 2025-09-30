@@ -7,7 +7,9 @@ from typing import Self
 
 from bukzor_color.core import Color
 from bukzor_color.encodings.base import ColorEncoding
-from bukzor_color.types import HSLHue, HSLSaturation, HSLLightness
+from bukzor_color.types import HSLHue
+from bukzor_color.types import HSLLightness
+from bukzor_color.types import HSLSaturation
 
 
 @dataclass(frozen=True, slots=True)
@@ -34,7 +36,9 @@ class HSLEncoding(ColorEncoding):
         text = text.strip()
 
         # Parse "hsl(h, s%, l%)" format
-        match = re.match(r'hsl\(\s*([0-9.]+)\s*,\s*([0-9.]+)%?\s*,\s*([0-9.]+)%?\s*\)', text)
+        match = re.match(
+            r"hsl\(\s*([0-9.]+)\s*,\s*([0-9.]+)%?\s*,\s*([0-9.]+)%?\s*\)", text
+        )
         if not match:
             raise ValueError(f"Invalid HSL format: {text}")
 

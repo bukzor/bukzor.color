@@ -33,7 +33,7 @@ class RGBEncoding(ColorEncoding):
         text = text.strip()
 
         # Parse "rgb(r, g, b)" format
-        match = re.match(r'rgb\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*\)', text)
+        match = re.match(r"rgb\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*\)", text)
         if not match:
             raise ValueError(f"Invalid RGB format: {text}")
 

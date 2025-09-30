@@ -7,18 +7,16 @@ from dataclasses import dataclass
 from decimal import Decimal
 from typing import Self
 
-from bukzor_color.types import (
-    ContrastRatio,
-    HSLHue,
-    HSLLightness,
-    HSLSaturation,
-    HSVHue,
-    HSVSaturation,
-    HSVValue,
-    Luminance,
-    RGBChannel,
-    Ratio,
-)
+from bukzor_color.types import ContrastRatio
+from bukzor_color.types import HSLHue
+from bukzor_color.types import HSLLightness
+from bukzor_color.types import HSLSaturation
+from bukzor_color.types import HSVHue
+from bukzor_color.types import HSVSaturation
+from bukzor_color.types import HSVValue
+from bukzor_color.types import Luminance
+from bukzor_color.types import Ratio
+from bukzor_color.types import RGBChannel
 
 
 @dataclass(frozen=True, slots=True)
@@ -53,7 +51,9 @@ class RGB:
     def from_rgb_string(cls, rgb_string: str) -> Self:
         """Parse from rgb string like 'rgb(255, 0, 0)'."""
         # Extract numbers from rgb() format
-        match = re.match(r"rgb\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*\)", rgb_string)
+        match = re.match(
+            r"rgb\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*\)", rgb_string
+        )
         if not match:
             raise ValueError(f"Invalid RGB format: {rgb_string}")
 
@@ -70,13 +70,16 @@ class RGB:
 
     def luminance(self) -> Luminance:
         """Calculate relative luminance per WCAG 2.1."""
+
         # Convert to linear RGB using Decimal for precision
         def linearize(channel: int) -> Decimal:
-            normalized = Decimal(channel) / Decimal('255')
-            if normalized <= Decimal('0.03928'):
-                return normalized / Decimal('12.92')
+            normalized = Decimal(channel) / Decimal("255")
+            if normalized <= Decimal("0.03928"):
+                return normalized / Decimal("12.92")
             else:
-                return ((normalized + Decimal('0.055')) / Decimal('1.055')) ** Decimal('2.4')
+                return (
+                    (normalized + Decimal("0.055")) / Decimal("1.055")
+                ) ** Decimal("2.4")
 
         r_linear = linearize(self.r)
         g_linear = linearize(self.g)
@@ -84,9 +87,9 @@ class RGB:
 
         # ITU-R BT.709 coefficients
         return Luminance(
-            Decimal('0.2126') * r_linear +
-            Decimal('0.7152') * g_linear +
-            Decimal('0.0722') * b_linear
+            Decimal("0.2126") * r_linear
+            + Decimal("0.7152") * g_linear
+            + Decimal("0.0722") * b_linear
         )
 
     def contrast_ratio(self, other: RGB) -> ContrastRatio:
@@ -96,9 +99,13 @@ class RGB:
 
         # Ensure lighter color is in numerator
         if l1 > l2:
-            return ContrastRatio((l1 + Decimal('0.05')) / (l2 + Decimal('0.05')))
+            return ContrastRatio(
+                (l1 + Decimal("0.05")) / (l2 + Decimal("0.05"))
+            )
         else:
-            return ContrastRatio((l2 + Decimal('0.05')) / (l1 + Decimal('0.05')))
+            return ContrastRatio(
+                (l2 + Decimal("0.05")) / (l1 + Decimal("0.05"))
+            )
 
     def with_alpha(self, alpha: Ratio) -> RGBA:
         """Create RGBA color with alpha channel."""
@@ -106,44 +113,44 @@ class RGB:
 
     def to_hsl(self) -> HSL:
         """Convert to HSL color space."""
-        r_norm = Decimal(self.r) / Decimal('255')
-        g_norm = Decimal(self.g) / Decimal('255')
-        b_norm = Decimal(self.b) / Decimal('255')
+        r_norm = Decimal(self.r) / Decimal("255")
+        g_norm = Decimal(self.g) / Decimal("255")
+        b_norm = Decimal(self.b) / Decimal("255")
 
         max_val = max(r_norm, g_norm, b_norm)
         min_val = min(r_norm, g_norm, b_norm)
         diff = max_val - min_val
 
         # Lightness
-        lightness = (max_val + min_val) / Decimal('2')
+        lightness = (max_val + min_val) / Decimal("2")
 
         if diff == 0:
             # Achromatic (gray)
-            hue = Decimal('0')
-            saturation = Decimal('0')
+            hue = Decimal("0")
+            saturation = Decimal("0")
         else:
             # Saturation
-            if lightness < Decimal('0.5'):
+            if lightness < Decimal("0.5"):
                 saturation = diff / (max_val + min_val)
             else:
-                saturation = diff / (Decimal('2') - max_val - min_val)
+                saturation = diff / (Decimal("2") - max_val - min_val)
 
             # Hue
             if max_val == r_norm:
                 hue = (g_norm - b_norm) / diff
                 if g_norm < b_norm:
-                    hue += Decimal('6')
+                    hue += Decimal("6")
             elif max_val == g_norm:
-                hue = (b_norm - r_norm) / diff + Decimal('2')
+                hue = (b_norm - r_norm) / diff + Decimal("2")
             else:  # max_val == b_norm
-                hue = (r_norm - g_norm) / diff + Decimal('4')
+                hue = (r_norm - g_norm) / diff + Decimal("4")
 
-            hue *= Decimal('60')  # Convert to degrees
+            hue *= Decimal("60")  # Convert to degrees
 
         return HSL(
             HSLHue(hue),
-            HSLSaturation(saturation * Decimal('100')),
-            HSLLightness(lightness * Decimal('100')),
+            HSLSaturation(saturation * Decimal("100")),
+            HSLLightness(lightness * Decimal("100")),
         )
 
     def to_hsv(self) -> HSV:
@@ -212,7 +219,7 @@ class RGBA:
         """Composite over background using alpha blending."""
         # Alpha compositing formula: C = αA + (1-α)B
         alpha = self.a
-        inv_alpha = Decimal('1.0') - alpha
+        inv_alpha = Decimal("1.0") - alpha
 
         r = int(alpha * self.r + inv_alpha * background.r)
         g = int(alpha * self.g + inv_alpha * background.g)
@@ -261,43 +268,45 @@ class HSL:
 
     def to_rgb(self) -> RGB:
         """Convert to RGB color space."""
-        h_norm = self.h / Decimal('360.0')
-        s_norm = self.s / Decimal('100.0')
-        l_norm = self.l / Decimal('100.0')
+        h_norm = self.h / Decimal("360.0")
+        s_norm = self.s / Decimal("100.0")
+        l_norm = self.l / Decimal("100.0")
 
         if s_norm == 0:
             # Achromatic (gray)
-            gray: int = int(l_norm * Decimal('255'))
+            gray: int = int(l_norm * Decimal("255"))
             return RGB(RGBChannel(gray), RGBChannel(gray), RGBChannel(gray))
 
         def hue_to_rgb(p: Decimal, q: Decimal, t: Decimal) -> Decimal:
             if t < 0:
-                t += Decimal('1')
+                t += Decimal("1")
             if t > 1:
-                t -= Decimal('1')
-            if t < Decimal('1') / Decimal('6'):
-                return p + (q - p) * Decimal('6') * t
-            if t < Decimal('1') / Decimal('2'):
+                t -= Decimal("1")
+            if t < Decimal("1") / Decimal("6"):
+                return p + (q - p) * Decimal("6") * t
+            if t < Decimal("1") / Decimal("2"):
                 return q
-            if t < Decimal('2') / Decimal('3'):
-                return p + (q - p) * (Decimal('2') / Decimal('3') - t) * Decimal('6')
+            if t < Decimal("2") / Decimal("3"):
+                return p + (q - p) * (
+                    Decimal("2") / Decimal("3") - t
+                ) * Decimal("6")
             return p
 
-        if l_norm < Decimal('0.5'):
-            q = l_norm * (Decimal('1') + s_norm)
+        if l_norm < Decimal("0.5"):
+            q = l_norm * (Decimal("1") + s_norm)
         else:
             q = l_norm + s_norm - l_norm * s_norm
 
-        p = Decimal('2') * l_norm - q
+        p = Decimal("2") * l_norm - q
 
-        r = hue_to_rgb(p, q, h_norm + Decimal('1') / Decimal('3'))
+        r = hue_to_rgb(p, q, h_norm + Decimal("1") / Decimal("3"))
         g = hue_to_rgb(p, q, h_norm)
-        b = hue_to_rgb(p, q, h_norm - Decimal('1') / Decimal('3'))
+        b = hue_to_rgb(p, q, h_norm - Decimal("1") / Decimal("3"))
 
         return RGB(
-            RGBChannel(int(round(r * Decimal('255')))),
-            RGBChannel(int(round(g * Decimal('255')))),
-            RGBChannel(int(round(b * Decimal('255')))),
+            RGBChannel(int(round(r * Decimal("255")))),
+            RGBChannel(int(round(g * Decimal("255")))),
+            RGBChannel(int(round(b * Decimal("255")))),
         )
 
     def with_lightness(self, lightness: HSLLightness) -> Self:
@@ -349,22 +358,22 @@ class HSV:
 
     def to_rgb(self) -> RGB:
         """Convert to RGB color space."""
-        h_norm = self.h / Decimal('360.0')
-        s_norm = self.s / Decimal('100.0')
-        v_norm = self.v / Decimal('100.0')
+        h_norm = self.h / Decimal("360.0")
+        s_norm = self.s / Decimal("100.0")
+        v_norm = self.v / Decimal("100.0")
 
         if s_norm == 0:
             # Achromatic (gray)
-            gray: int = int(v_norm * Decimal('255'))
+            gray: int = int(v_norm * Decimal("255"))
             return RGB(RGBChannel(gray), RGBChannel(gray), RGBChannel(gray))
 
-        h_sector = h_norm * Decimal('6.0')
+        h_sector = h_norm * Decimal("6.0")
         i = int(h_sector)
         f = h_sector - Decimal(i)
 
-        p = v_norm * (Decimal('1') - s_norm)
-        q = v_norm * (Decimal('1') - s_norm * f)
-        t = v_norm * (Decimal('1') - s_norm * (Decimal('1') - f))
+        p = v_norm * (Decimal("1") - s_norm)
+        q = v_norm * (Decimal("1") - s_norm * f)
+        t = v_norm * (Decimal("1") - s_norm * (Decimal("1") - f))
 
         if i == 0:
             r, g, b = v_norm, t, p
@@ -380,9 +389,9 @@ class HSV:
             r, g, b = v_norm, p, q
 
         return RGB(
-            RGBChannel(int(round(r * Decimal('255')))),
-            RGBChannel(int(round(g * Decimal('255')))),
-            RGBChannel(int(round(b * Decimal('255')))),
+            RGBChannel(int(round(r * Decimal("255")))),
+            RGBChannel(int(round(g * Decimal("255")))),
+            RGBChannel(int(round(b * Decimal("255")))),
         )
 
     def with_value(self, value: HSVValue) -> Self:

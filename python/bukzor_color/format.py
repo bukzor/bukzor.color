@@ -30,12 +30,15 @@ def to_hsv_string(color: Color) -> str:
 
 def _color_to_hsv(color: Color) -> tuple[Decimal, Decimal, Decimal]:
     """Convert Color to HSV values (h: 0-360, s,v: 0-100)."""
+
     # Convert to sRGB first for HSV calculation
     def linear_to_srgb_norm(component: Decimal) -> Decimal:
-        if component <= Decimal('0.0031308'):
-            return component * Decimal('12.92')
+        if component <= Decimal("0.0031308"):
+            return component * Decimal("12.92")
         else:
-            return Decimal('1.055') * (component ** (Decimal('1') / Decimal('2.4'))) - Decimal('0.055')
+            return Decimal("1.055") * (
+                component ** (Decimal("1") / Decimal("2.4"))
+            ) - Decimal("0.055")
 
     r_norm = linear_to_srgb_norm(color.red)
     g_norm = linear_to_srgb_norm(color.green)
@@ -50,13 +53,13 @@ def _color_to_hsv(color: Color) -> tuple[Decimal, Decimal, Decimal]:
 
     # Saturation
     if max_val == 0:
-        saturation = Decimal('0')
+        saturation = Decimal("0")
     else:
         saturation = diff / max_val
 
     # Hue
     if diff == 0:
-        hue = Decimal('0')
+        hue = Decimal("0")
     else:
         if max_val == r_norm:
             hue = (g_norm - b_norm) / diff

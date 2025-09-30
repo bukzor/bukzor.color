@@ -24,3 +24,4 @@ pnpm-lock.yaml
 
 # dirty hacks
 trash/
+.*.sw[a-z]

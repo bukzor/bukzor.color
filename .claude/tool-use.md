@@ -3,7 +3,9 @@
 ## Bash Tool
 
 ### Working Directory Persistence
-**Important**: The working directory persists across Bash() tool calls within a conversation.
+
+**Important**: The working directory persists across Bash() tool calls within a
+conversation.
 
 ```python
 # ✗ Bad - assumes directory state
@@ -18,6 +20,7 @@ Bash("cargo --manifest-path rust/Cargo.toml build")
 ```
 
 ### Command Chaining
+
 ```python
 # ✓ Good - single tool call
 Bash("cmd1 && cmd2 && cmd3")
@@ -28,11 +31,13 @@ Bash("echo $VAR")  # VAR won't be set
 ```
 
 ### Error Handling
+
 The Bash tool returns error output - check and handle appropriately.
 
 ## Read Tool
 
 ### Always Read Before Edit
+
 ```python
 # ✓ Good
 Read("file.txt")
@@ -43,18 +48,22 @@ Edit("file.txt", old_string="guess", new_string="...")
 ```
 
 ### Line Numbers
-Line numbers in Read output use the format: `spaces + line number + tab + content`
+
+Line numbers in Read output use the format:
+`spaces + line number + tab + content`
 
 When using Edit, match content exactly as it appears AFTER the tab.
 
 ## Edit Tool
 
 ### Exact Matching Required
+
 - `old_string` must match exactly (including whitespace)
 - Include enough context to ensure uniqueness
 - Use `replace_all=True` for multiple occurrences
 
 ### Indentation Preservation
+
 ```python
 # Read shows: "    4→    def function():"
 # The actual content is "    def function():" (4 spaces)
@@ -69,9 +78,12 @@ Edit(
 ## Write Tool
 
 ### Overwrite Warning
-Write tool completely replaces file contents. Always use Read first for existing files.
+
+Write tool completely replaces file contents. Always use Read first for existing
+files.
 
 ### Creating New Files
+
 ```python
 # ✓ Good - explicit about creating new file
 Write("new_file.txt", content="...")
@@ -82,6 +94,7 @@ Write("new_file.txt", content="...")
 ## Git Operations via Bash
 
 ### Check Status First
+
 ```python
 Bash("git status")
 # Review output before staging
@@ -90,6 +103,7 @@ Bash("git commit -m 'message'")
 ```
 
 ### Amending Commits
+
 ```python
 # For related fixes
 Bash("git add -u")
@@ -100,6 +114,7 @@ Bash("git push --force-with-lease")
 ## Multi-Edit Tool
 
 Use when making multiple changes to the same file:
+
 ```python
 MultiEdit(
     file_path="file.py",
@@ -113,11 +128,13 @@ MultiEdit(
 ## WebSearch and WebFetch
 
 ### WebSearch for Research
+
 ```python
 WebSearch("query terms")  # Returns search results
 ```
 
 ### WebFetch for Specific Pages
+
 ```python
 WebFetch(
     url="https://...",
@@ -128,12 +145,14 @@ WebFetch(
 ## TodoWrite Tool
 
 ### When to Use
+
 - Complex multi-step tasks
 - Tasks requiring careful planning
 - Multiple related operations
 - Tracking progress through long conversations
 
 ### Status Management
+
 ```python
 TodoWrite(todos=[
     {"content": "Task 1", "status": "completed", "activeForm": "Completing Task 1"},

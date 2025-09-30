@@ -4,11 +4,11 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from decimal import Decimal
-from typing import Self, TYPE_CHECKING
+from typing import TYPE_CHECKING
+from typing import Self
 
 if TYPE_CHECKING:
     from bukzor_color.encodings.base import ColorEncoding
-
 
 
 @dataclass(frozen=True, slots=True)
@@ -22,22 +22,31 @@ class Color:
     """
 
     # Linear RGB components in [0,1] range using Decimal for precision
-    red: Decimal    # Linear red component 0-1
+    red: Decimal  # Linear red component 0-1
     green: Decimal  # Linear green component 0-1
-    blue: Decimal   # Linear blue component 0-1
+    blue: Decimal  # Linear blue component 0-1
 
     def __post_init__(self) -> None:
         """Validate color components are in valid range."""
-        for component, value in [("red", self.red), ("green", self.green), ("blue", self.blue)]:
+        for component, value in [
+            ("red", self.red),
+            ("green", self.green),
+            ("blue", self.blue),
+        ]:
             if not 0 <= value <= 1:
                 raise ValueError(f"Color {component} must be 0-1, got {value}")
 
-
     def _validate_for_egress(self) -> None:
         """Validate color components before output/conversion."""
-        for component, value in [("red", self.red), ("green", self.green), ("blue", self.blue)]:
+        for component, value in [
+            ("red", self.red),
+            ("green", self.green),
+            ("blue", self.blue),
+        ]:
             if not 0 <= value <= 1:
-                raise ValueError(f"Color {component} must be 0-1 for output, got {value}")
+                raise ValueError(
+                    f"Color {component} must be 0-1 for output, got {value}"
+                )
 
     @classmethod
     def from_linear_rgb(cls, r: Decimal, g: Decimal, b: Decimal) -> Self:
@@ -47,19 +56,18 @@ class Color:
     @classmethod
     def from_srgb(cls, r: int, g: int, b: int) -> Self:
         """Create color from sRGB values in [0,255] range."""
+
         # Convert sRGB to linear RGB
         def srgb_to_linear(channel: int) -> Decimal:
-            normalized = Decimal(channel) / Decimal('255')
-            if normalized <= Decimal('0.04045'):
-                return normalized / Decimal('12.92')
+            normalized = Decimal(channel) / Decimal("255")
+            if normalized <= Decimal("0.04045"):
+                return normalized / Decimal("12.92")
             else:
-                return ((normalized + Decimal('0.055')) / Decimal('1.055')) ** Decimal('2.4')
+                return (
+                    (normalized + Decimal("0.055")) / Decimal("1.055")
+                ) ** Decimal("2.4")
 
-        return cls(
-            srgb_to_linear(r),
-            srgb_to_linear(g),
-            srgb_to_linear(b)
-        )
+        return cls(srgb_to_linear(r), srgb_to_linear(g), srgb_to_linear(b))
 
     @classmethod
     def from_hex(cls, hex_string: str) -> Self:
@@ -79,57 +87,56 @@ class Color:
     @classmethod
     def from_hsl(cls, h: Decimal, s: Decimal, l: Decimal) -> Self:
         """Create color from HSL values (h: 0-360, s,l: 0-100)."""
-        h_norm = h / Decimal('360')
-        s_norm = s / Decimal('100')
-        l_norm = l / Decimal('100')
+        h_norm = h / Decimal("360")
+        s_norm = s / Decimal("100")
+        l_norm = l / Decimal("100")
 
         if s_norm == 0:
             # Achromatic
             r = g = b = l_norm
         else:
+
             def hue_to_rgb(p: Decimal, q: Decimal, t: Decimal) -> Decimal:
                 if t < 0:
                     t += 1
                 if t > 1:
                     t -= 1
-                if t < Decimal('1') / 6:
+                if t < Decimal("1") / 6:
                     return p + (q - p) * 6 * t
-                if t < Decimal('1') / 2:
+                if t < Decimal("1") / 2:
                     return q
-                if t < Decimal('2') / 3:
-                    return p + (q - p) * (Decimal('2') / 3 - t) * 6
+                if t < Decimal("2") / 3:
+                    return p + (q - p) * (Decimal("2") / 3 - t) * 6
                 return p
 
-            if l_norm < Decimal('0.5'):
+            if l_norm < Decimal("0.5"):
                 q = l_norm * (1 + s_norm)
             else:
                 q = l_norm + s_norm - l_norm * s_norm
 
             p = 2 * l_norm - q
 
-            r = hue_to_rgb(p, q, h_norm + Decimal('1') / 3)
+            r = hue_to_rgb(p, q, h_norm + Decimal("1") / 3)
             g = hue_to_rgb(p, q, h_norm)
-            b = hue_to_rgb(p, q, h_norm - Decimal('1') / 3)
+            b = hue_to_rgb(p, q, h_norm - Decimal("1") / 3)
 
         # Convert sRGB to linear
         def srgb_to_linear(component: Decimal) -> Decimal:
-            if component <= Decimal('0.04045'):
-                return component / Decimal('12.92')
+            if component <= Decimal("0.04045"):
+                return component / Decimal("12.92")
             else:
-                return ((component + Decimal('0.055')) / Decimal('1.055')) ** Decimal('2.4')
+                return (
+                    (component + Decimal("0.055")) / Decimal("1.055")
+                ) ** Decimal("2.4")
 
-        return cls(
-            srgb_to_linear(r),
-            srgb_to_linear(g),
-            srgb_to_linear(b)
-        )
+        return cls(srgb_to_linear(r), srgb_to_linear(g), srgb_to_linear(b))
 
     @classmethod
     def from_hsv(cls, h: Decimal, s: Decimal, v: Decimal) -> Self:
         """Create color from HSV values (h: 0-360, s,v: 0-100)."""
-        h_norm = h / Decimal('360')
-        s_norm = s / Decimal('100')
-        v_norm = v / Decimal('100')
+        h_norm = h / Decimal("360")
+        s_norm = s / Decimal("100")
+        v_norm = v / Decimal("100")
 
         if s_norm == 0:
             # Achromatic
@@ -157,32 +164,33 @@ class Color:
 
         # Convert sRGB to linear
         def srgb_to_linear(component: Decimal) -> Decimal:
-            if component <= Decimal('0.04045'):
-                return component / Decimal('12.92')
+            if component <= Decimal("0.04045"):
+                return component / Decimal("12.92")
             else:
-                return ((component + Decimal('0.055')) / Decimal('1.055')) ** Decimal('2.4')
+                return (
+                    (component + Decimal("0.055")) / Decimal("1.055")
+                ) ** Decimal("2.4")
 
-        return cls(
-            srgb_to_linear(r),
-            srgb_to_linear(g),
-            srgb_to_linear(b)
-        )
+        return cls(srgb_to_linear(r), srgb_to_linear(g), srgb_to_linear(b))
 
     def to_srgb(self) -> tuple[int, int, int]:
         """Convert to sRGB values in [0,255] range."""
+
         def linear_to_srgb(component: Decimal) -> int:
-            if component <= Decimal('0.0031308'):
-                srgb = component * Decimal('12.92')
+            if component <= Decimal("0.0031308"):
+                srgb = component * Decimal("12.92")
             else:
-                srgb = Decimal('1.055') * (component ** (Decimal('1') / Decimal('2.4'))) - Decimal('0.055')
+                srgb = Decimal("1.055") * (
+                    component ** (Decimal("1") / Decimal("2.4"))
+                ) - Decimal("0.055")
 
             # Clamp and convert to int
-            return max(0, min(255, int(srgb * 255 + Decimal('0.5'))))
+            return max(0, min(255, int(srgb * 255 + Decimal("0.5"))))
 
         return (
             linear_to_srgb(self.red),
             linear_to_srgb(self.green),
-            linear_to_srgb(self.blue)
+            linear_to_srgb(self.blue),
         )
 
     def to_hex(self) -> str:
@@ -192,12 +200,15 @@ class Color:
 
     def to_hsl(self) -> tuple[Decimal, Decimal, Decimal]:
         """Convert to HSL values (h: 0-360, s,l: 0-100)."""
+
         # First convert to sRGB for HSL calculation
         def linear_to_srgb_norm(component: Decimal) -> Decimal:
-            if component <= Decimal('0.0031308'):
-                return component * Decimal('12.92')
+            if component <= Decimal("0.0031308"):
+                return component * Decimal("12.92")
             else:
-                return Decimal('1.055') * (component ** (Decimal('1') / Decimal('2.4'))) - Decimal('0.055')
+                return Decimal("1.055") * (
+                    component ** (Decimal("1") / Decimal("2.4"))
+                ) - Decimal("0.055")
 
         r_norm = linear_to_srgb_norm(self.red)
         g_norm = linear_to_srgb_norm(self.green)
@@ -212,11 +223,11 @@ class Color:
 
         if diff == 0:
             # Achromatic
-            hue = Decimal('0')
-            saturation = Decimal('0')
+            hue = Decimal("0")
+            saturation = Decimal("0")
         else:
             # Saturation
-            if lightness < Decimal('0.5'):
+            if lightness < Decimal("0.5"):
                 saturation = diff / (max_val + min_val)
             else:
                 saturation = diff / (2 - max_val - min_val)
@@ -237,12 +248,15 @@ class Color:
 
     def to_hsv(self) -> tuple[Decimal, Decimal, Decimal]:
         """Convert to HSV values (h: 0-360, s,v: 0-100)."""
+
         # First convert to sRGB for HSV calculation
         def linear_to_srgb_norm(component: Decimal) -> Decimal:
-            if component <= Decimal('0.0031308'):
-                return component * Decimal('12.92')
+            if component <= Decimal("0.0031308"):
+                return component * Decimal("12.92")
             else:
-                return Decimal('1.055') * (component ** (Decimal('1') / Decimal('2.4'))) - Decimal('0.055')
+                return Decimal("1.055") * (
+                    component ** (Decimal("1") / Decimal("2.4"))
+                ) - Decimal("0.055")
 
         r_norm = linear_to_srgb_norm(self.red)
         g_norm = linear_to_srgb_norm(self.green)
@@ -257,12 +271,12 @@ class Color:
 
         if max_val == 0:
             # Black
-            hue = Decimal('0')
-            saturation = Decimal('0')
+            hue = Decimal("0")
+            saturation = Decimal("0")
         elif diff == 0:
             # Achromatic (gray)
-            hue = Decimal('0')
-            saturation = Decimal('0')
+            hue = Decimal("0")
+            saturation = Decimal("0")
         else:
             # Saturation
             saturation = diff / max_val
@@ -281,7 +295,6 @@ class Color:
 
         return (hue, saturation * 100, value * 100)
 
-
     def with_lightness(self, lightness: Decimal) -> Self:
         """Create new color with different lightness in HSL space."""
         h, s, _ = self.to_hsl()
@@ -298,16 +311,16 @@ class Color:
         wcag = WcagHCLEncoding.encode(self)
         return wcag.l
 
-    def contrast_ratio(self, other: 'Color') -> Decimal:
+    def contrast_ratio(self, other: Color) -> Decimal:
         """Calculate WCAG contrast ratio with another color."""
         l1 = self.luminance()
         l2 = other.luminance()
 
         # Ensure lighter color is in numerator
         if l1 > l2:
-            ratio = (l1 + Decimal('0.05')) / (l2 + Decimal('0.05'))
+            ratio = (l1 + Decimal("0.05")) / (l2 + Decimal("0.05"))
         else:
-            ratio = (l2 + Decimal('0.05')) / (l1 + Decimal('0.05'))
+            ratio = (l2 + Decimal("0.05")) / (l1 + Decimal("0.05"))
 
         return ratio
 
@@ -337,5 +350,5 @@ class ColorWithAlpha:
         return Color.from_linear_rgb(
             alpha * self.color.red + inv_alpha * background.red,
             alpha * self.color.green + inv_alpha * background.green,
-            alpha * self.color.blue + inv_alpha * background.blue
+            alpha * self.color.blue + inv_alpha * background.blue,
         )

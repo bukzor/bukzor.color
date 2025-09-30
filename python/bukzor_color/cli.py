@@ -5,12 +5,13 @@ from typing import Any
 
 import click
 
-from bukzor_color.contrast import adjust_contrast, calculate_contrast
+from bukzor_color.contrast import adjust_contrast
+from bukzor_color.contrast import calculate_contrast
 from bukzor_color.encodings import encodings
 
 ENCODING_REGISTRY = {
-    'hex': encodings.HexEncoding,
-    'wcag-hcl': encodings.WcagHCLEncoding,
+    "hex": encodings.HexEncoding,
+    "wcag-hcl": encodings.WcagHCLEncoding,
 }
 HexEncoding = encodings.HexEncoding
 RGBEncoding = encodings.RGBEncoding
@@ -78,7 +79,9 @@ def convert(input_color: str, to: str, output_json: bool) -> None:
 @click.argument("foreground")
 @click.argument("background")
 @click.option("--json", "output_json", is_flag=True, help="Output as JSON")
-def contrast_check(foreground: str, background: str, output_json: bool) -> None:
+def contrast_check(
+    foreground: str, background: str, output_json: bool
+) -> None:
     """Check WCAG contrast ratio between two colors."""
     try:
         fg_color = auto_parse(foreground).decode()
@@ -117,9 +120,22 @@ def contrast_check(foreground: str, background: str, output_json: bool) -> None:
 @main.command("contrast-adjust")
 @click.argument("foreground")
 @click.argument("background")
-@click.option("--target", default="AA", help="Target WCAG level (AA, AAA, AA-large, AAA-large) or ratio")
-@click.option("--adjust", default="auto", help="Which color to adjust (fg, bg, both, auto)")
-@click.option("--preserve-hue", is_flag=True, default=True, help="Preserve hue during adjustment")
+@click.option(
+    "--target",
+    default="AA",
+    help="Target WCAG level (AA, AAA, AA-large, AAA-large) or ratio",
+)
+@click.option(
+    "--adjust",
+    default="auto",
+    help="Which color to adjust (fg, bg, both, auto)",
+)
+@click.option(
+    "--preserve-hue",
+    is_flag=True,
+    default=True,
+    help="Preserve hue during adjustment",
+)
 @click.option("--json", "output_json", is_flag=True, help="Output as JSON")
 def contrast_adjust(
     foreground: str,
@@ -127,7 +143,7 @@ def contrast_adjust(
     target: str,
     adjust: str,
     preserve_hue: bool,
-    output_json: bool
+    output_json: bool,
 ) -> None:
     """Adjust colors to meet target contrast ratio."""
     try:
@@ -137,7 +153,9 @@ def contrast_adjust(
         # Parse target (could be WCAG level or numeric ratio)
         try:
             from decimal import Decimal
+
             from bukzor_color.types import ContrastRatio
+
             target_ratio: ContrastRatio = ContrastRatio(Decimal(target))
             is_numeric_target = True
         except:
@@ -150,10 +168,7 @@ def contrast_adjust(
             raise ValueError(f"Invalid adjust option: {adjust}")
 
         adjusted_fg, adjusted_bg, result = adjust_contrast(
-            fg_color,
-            bg_color,
-            target_ratio,
-            adjust=adjust
+            fg_color, bg_color, target_ratio, adjust=adjust
         )
 
         if output_json:
@@ -172,7 +187,9 @@ def contrast_adjust(
             click.echo(json.dumps(output_data, indent=2))
         else:
             click.echo(f"Original: fg={foreground} bg={background}")
-            click.echo(f"Adjusted: fg={HexEncoding.encode(adjusted_fg)} bg={HexEncoding.encode(adjusted_bg)}")
+            click.echo(
+                f"Adjusted: fg={HexEncoding.encode(adjusted_fg)} bg={HexEncoding.encode(adjusted_bg)}"
+            )
             click.echo(f"Contrast ratio: {result.ratio:.2f}")
             if is_numeric_target:
                 meets_target: bool = result.ratio >= target_ratio  # type: ignore[operator]

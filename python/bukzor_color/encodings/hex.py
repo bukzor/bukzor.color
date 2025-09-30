@@ -32,13 +32,13 @@ class HexEncoding(ColorEncoding):
         """Parse text to hex encoding."""
         # Normalize format
         clean_text = text.strip()
-        if clean_text.startswith('#'):
+        if clean_text.startswith("#"):
             clean_text = clean_text[1:]
 
         # Expand 3-character hex to 6-character
         if re.match(r"^[0-9a-fA-F]{3}$", clean_text):
             # abc -> aabbcc
-            expanded = ''.join(c*2 for c in clean_text)
+            expanded = "".join(c * 2 for c in clean_text)
             clean_text = expanded
 
         if not re.match(r"^[0-9a-fA-F]{6}$", clean_text):

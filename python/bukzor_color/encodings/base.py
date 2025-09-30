@@ -1,6 +1,7 @@
 """Base class for color encodings."""
 
-from abc import ABC, abstractmethod
+from abc import ABC
+from abc import abstractmethod
 from typing import Self
 
 from bukzor_color.core import Color

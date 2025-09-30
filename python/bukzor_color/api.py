@@ -3,11 +3,15 @@
 from __future__ import annotations
 
 import re
-from dataclasses import dataclass, field
+from dataclasses import dataclass
+from dataclasses import field
 from decimal import Decimal
 from typing import Self
 
-from bukzor_color.models import HSL, HSV, RGB, RGBA
+from bukzor_color.models import HSL
+from bukzor_color.models import HSV
+from bukzor_color.models import RGB
+from bukzor_color.models import RGBA
 from bukzor_color.types import ColorSpace
 
 
@@ -26,7 +30,9 @@ class Color:
     def __post_init__(self) -> None:
         """Ensure at least one color representation is provided."""
         if not any([self._rgb, self._hsl, self._hsv]):
-            raise ValueError("At least one color representation must be provided")
+            raise ValueError(
+                "At least one color representation must be provided"
+            )
 
     @classmethod
     def from_rgb(cls, rgb: RGB) -> Self:
@@ -152,8 +158,9 @@ class Color:
 
     def with_alpha(self, alpha: float | Decimal) -> ColorWithAlpha:
         """Add alpha channel."""
-        from bukzor_color.types import Ratio
         from decimal import Decimal
+
+        from bukzor_color.types import Ratio
 
         if isinstance(alpha, float):
             alpha = Decimal(str(alpha))
