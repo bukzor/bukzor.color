@@ -1,0 +1,73 @@
+# yaml-language-server: $schema=https://json.schemastore.org/pre-commit-config.json
+
+repos:
+  # Project-specific hooks are local to ensure dev tooling and pre-commit always match
+  - repo: local
+    hooks:
+      # Prettier - configured in .editorconfig, .prettierrc.json5
+      - id: prettier
+        name: prettier
+        entry: pnpm-run prettier --write --ignore-unknown
+        language: system
+        types: [text]
+
+      # Python formatting chain - runs in this order for best results
+      # 1. Upgrade syntax to modern Python
+      - id: pyupgrade
+        name: pyupgrade
+        entry: uv run pyupgrade --py313-plus
+        language: system
+        types: [python]
+
+      # 2. Sort imports
+      - id: isort
+        name: isort
+        entry: uv run isort
+        language: system
+        types: [python]
+
+      # 3. Format code
+      - id: black
+        name: black
+        entry: uv run black
+        language: system
+        types: [python]
+
+      # 4. Type check (runs after formatting for cleaner output)
+      - id: pyright
+        name: pyright
+        entry: pnpm-run pyright
+        language: system
+        types: [python]
+        pass_filenames: false # For performance with large codebases
+
+      # Rust formatting and linting
+      - id: rustfmt
+        name: rustfmt
+        entry: cargo fmt
+        language: system
+        types: [rust]
+        pass_filenames: false
+
+      - id: clippy
+        name: clippy
+        entry: cargo clippy --all-targets --all-features -- -D warnings
+        language: system
+        types: [rust]
+        pass_filenames: false
+
+  # Standard file hygiene hooks
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.4.0
+    hooks:
+      - id: check-yaml
+      - id: check-merge-conflict
+      - id: check-case-conflict
+      - id: detect-private-key
+      - id: debug-statements
+      - id: name-tests-test
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+
+ci: # pre-commit.ci configuration
+  {}

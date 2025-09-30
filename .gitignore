@@ -1,0 +1,26 @@
+# normally I don't care to version-control uv.lock till later in the project
+uv.lock
+
+# Python
+__pycache__/
+*.py[cod]
+build/
+dist/
+*.egg-info/
+.venv/
+
+# Testing
+.hypothesis/
+.pytest_cache/
+
+# Rust
+target/
+Cargo.lock
+
+# Node.js
+node_modules/
+# normally I don't care to version-control pnpm-lock.yaml till later in the project
+pnpm-lock.yaml
+
+# dirty hacks
+trash/
